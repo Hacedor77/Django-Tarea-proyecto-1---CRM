@@ -1,7 +1,17 @@
 import os
 from pathlib import Path
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# SEGURIDAD: Usar variable de entorno para SECRET_KEY
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'pgi0o-x@m0r8u6l52fn=&9l@v*4^)4!o5jy0351z85wx77g77m')
+
+# DEBUG: False en producción
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+
+# ALLOWED_HOSTS: Obtener de variable de entorno
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -15,6 +25,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Para servir archivos estáticos
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -22,8 +33,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-LANGUAGE_CODE = 'es'
 
 ROOT_URLCONF = 'crm_project.urls'
 
@@ -43,18 +52,75 @@ TEMPLATES = [
     },
 ]
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+WSGI_APPLICATION = 'crm_project.wsgi.application'
 
+# CONFIGURACIÓN DE BASE DE DATOS
+# Prioridad: DATABASE_URL > Variables individuales > SQLite local
+if os.environ.get('DATABASE_URL'):
+    # Usar DATABASE_URL si está disponible
+    DATABASES = {
+        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+    }
+elif all([
+    os.environ.get('DATABASE_NAME'),
+    os.environ.get('DATABASE_USER'),
+    os.environ.get('DATABASE_PASSWORD'),
+    os.environ.get('DATABASE_HOST')
+]):
+    # Usar variables individuales de PostgreSQL
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DATABASE_NAME'),
+            'USER': os.environ.get('DATABASE_USER'),
+            'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+            'HOST': os.environ.get('DATABASE_HOST'),
+            'PORT': os.environ.get('DATABASE_PORT', '5432'),
+        }
+    }
+else:
+    # SQLite para desarrollo local
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
+# Password validation
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+# Internationalization
+LANGUAGE_CODE = 'es'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
+
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # Para collectstatic en producción
 
-DEBUG = True
-ALLOWED_HOSTS = ['django-tarea-proyecto-1-crm.onrender.com', 'localhost', '127.0.0.1']
+# WhiteNoise configuration para servir archivos estáticos
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-SECRET_KEY = "pgi0o-x@m0r8u6l52fn=&9l@v*4^)4!o5jy0351z85wx77g77m"
+# Login URLs
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/accounts/login/'
