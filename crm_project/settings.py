@@ -54,6 +54,6 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['django-tarea-proyecto-1-crm.onrender.com', 'localhost', '127.0.0.1']
 
 SECRET_KEY = "pgi0o-x@m0r8u6l52fn=&9l@v*4^)4!o5jy0351z85wx77g77m"
