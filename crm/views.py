@@ -11,7 +11,7 @@ from datetime import datetime
 from .models import Client, Interaction, Company
 from .forms import ClientForm, InteractionForm, CompanyForm, SearchForm
 
-@login_required
+
 def dashboard(request):
     # Estadísticas generales
     total_clients = Client.objects.count()
