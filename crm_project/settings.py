@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-import dj_database_url
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -55,37 +55,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'crm_project.wsgi.application'
 
 # CONFIGURACIÓN DE BASE DE DATOS
-# Prioridad: DATABASE_URL > Variables individuales > SQLite local
-if os.environ.get('DATABASE_URL'):
-    # Usar DATABASE_URL si está disponible
-    DATABASES = {
-        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-elif all([
-    os.environ.get('DATABASE_NAME'),
-    os.environ.get('DATABASE_USER'),
-    os.environ.get('DATABASE_PASSWORD'),
-    os.environ.get('DATABASE_HOST')
-]):
-    # Usar variables individuales de PostgreSQL
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('DATABASE_NAME'),
-            'USER': os.environ.get('DATABASE_USER'),
-            'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-            'HOST': os.environ.get('DATABASE_HOST'),
-            'PORT': os.environ.get('DATABASE_PORT', '5432'),
-        }
-    }
-else:
-    # SQLite para desarrollo local
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
