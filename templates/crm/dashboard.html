@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load crm_extras %} {# Carga tus filtros personalizados de crm_extras.py #}
+
+{% block title %}Panel de Control{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Panel del Control del CRM</h1>
+
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-primary shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-users me-2"></i> Clientes Totales</h5>
+                <p class="card-text fs-3">{{ total_clients }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-success shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-user-check me-2"></i> Clientes Activos</h5>
+                <p class="card-text fs-3">{{ active_clients }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-warning shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-user-plus me-2"></i> Clientes Potenciales</h5>
+                <p class="card-text fs-3">{{ prospects }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-white bg-info shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-comments me-2"></i> Interacciones Totales</h5>
+                <p class="card-text fs-3">{{ total_interactions }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> Interacciones del Mes Actual</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text fs-4 text-center">
+                    Se han registrado **{{ monthly_interactions }}** interacciones este mes.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-users me-2"></i> Clientes por Comercial (Top 5)</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for item in clients_by_user %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ item.assigned_user__username }}
+                            <span class="badge bg-primary rounded-pill">{{ item.count }}</span>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item">No hay datos de clientes por comercial.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i> Últimas 5 Interacciones</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Cliente</th>
+                                <th>Comercial</th>
+                                <th>Fecha</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for interaction in recent_interactions %}
+                                <tr>
+                                    <td>
+                                        <i class="{{ interaction.type|interaction_icon }}"></i> {{ interaction.get_type_display }}
+                                    </td>
+                                    <td><a href="{% url 'client_detail' interaction.client.pk %}">{{ interaction.client.name }}</a></td>
+                                    <td>{{ interaction.user.get_full_name|default:interaction.user.username }}</td>
+                                    <td>{{ interaction.date|date:"d M Y" }}</td>
+                                    <td>{{ interaction.description|truncatechars:70 }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No hay interacciones recientes.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Interacción{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Eliminar Interacción</h1>
+
+<div class="alert alert-danger" role="alert">
+    <h4 class="alert-heading">¡Atención! Estás a punto de eliminar una interacción.</h4>
+    <p>¿Estás seguro de que quieres eliminar la interacción de tipo <strong>"{{ interaction.get_type_display }}"</strong> con <strong>"{{ interaction.client.name }}"</strong> con fecha <strong>{{ interaction.date|date:"d M Y" }}</strong>?</p>
+    <p>Esta acción es irreversible.</p>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="d-flex justify-content-between">
+        <a href="{% url 'interaction_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i> Cancelar</a>
+        <button type="submit" class="btn btn-danger"><i class="fas fa-trash-alt me-1"></i> Confirmar Eliminación</button>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load crm_extras %} {# Para el filtro status_badge y interaction_icon #}
+
+{% block title %}Detalle de Cliente: {{ client.name }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Detalle de Cliente</h1>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">{{ client.name }}</h4>
+        <div>
+            <a href="{% url 'client_update' client.pk %}" class="btn btn-warning btn-sm me-2" title="Editar Cliente"><i class="fas fa-edit"></i> Editar</a>
+            <a href="{% url 'client_delete' client.pk %}" class="btn btn-danger btn-sm" title="Eliminar Cliente"><i class="fas fa-trash-alt"></i> Eliminar</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Email:</strong> {{ client.email }}</p>
+                <p><strong>Teléfono:</strong> {{ client.phone }}</p>
+                <p><strong>Empresa:</strong> {{ client.company.name }} (Sector: {{ client.company.sector }})</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Estado:</strong> {{ client.status|status_badge }}</p>
+                <p><strong>Comercial Asignado:</strong> {{ client.assigned_user.get_full_name|default:client.assigned_user.username }}</p>
+                <p><strong>Fecha de Creación:</strong> {{ client.created_at|date:"d M Y H:i" }}</p>
+                <p><strong>Última Actualización:</strong> {{ client.updated_at|date:"d M Y H:i" }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer text-end">
+        <a href="{% url 'client_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i> Volver al Listado</a>
+    </div>
+</div>
+
+<h2 class="mt-5 mb-3">Interacciones con {{ client.name }} <a href="{% url 'interaction_create' %}?client_id={{ client.pk }}" class="btn btn-primary btn-sm ms-3"><i class="fas fa-plus-circle me-1"></i> Añadir Interacción</a></h2>
+
+{% if interactions %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Tipo</th>
+                <th>Fecha</th>
+                <th>Duración (min)</th>
+                <th>Usuario</th>
+                <th>Descripción</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for interaction in interactions %}
+                <tr>
+                    <td><i class="{{ interaction.type|interaction_icon }}"></i> {{ interaction.get_type_display }}</td>
+                    <td>{{ interaction.date|date:"d M Y" }}</td>
+                    <td>{{ interaction.duration }}</td>
+                    <td>{{ interaction.user.get_full_name|default:interaction.user.username }}</td>
+                    <td>{{ interaction.description|truncatechars:100 }}</td>
+                    <td>
+                        <a href="{% url 'interaction_update' interaction.pk %}" class="btn btn-sm btn-warning" title="Editar Interacción"><i class="fas fa-edit"></i></a>
+                        <a href="{% url 'interaction_delete' interaction.pk %}" class="btn btn-sm btn-danger ms-1" title="Eliminar Interacción"><i class="fas fa-trash-alt"></i></a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+    <div class="alert alert-info" role="alert">
+        No hay interacciones registradas para este cliente. <a href="{% url 'interaction_create' %}?client_id={{ client.pk }}" class="alert-link">¡Añade una ahora!</a>
+    </div>
+{% endif %}
+{% endblock %}
