@@ -28,7 +28,9 @@ def dashboard(request):
     ).count()
     
     # Clientes por comercial
-    clients_by_user = Client.objects.values('assigned_user__username').annotate(
+    clients_by_user = Client.objects.filter(assigned_user__isnull=False).values(
+        'assigned_user__username'
+    ).annotate(
         count=Count('id')
     ).order_by('-count')[:5]
     
