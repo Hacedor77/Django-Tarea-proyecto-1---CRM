@@ -19,7 +19,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'crm',  # Comentar temporalmente para probar
+    'crm',  # Agregar la app CRM
 ]
 
 MIDDLEWARE = [
