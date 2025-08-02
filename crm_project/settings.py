@@ -9,12 +9,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-clave-temporal-para-d
 # DEBUG: Activar temporalmente para ver errores
 DEBUG = True  # Cambiar a True temporalmente para ver errores
 
-ALLOWED_HOSTS = [
-    'localhost', 
-    '127.0.0.1', 
-    '.onrender.com',
-    os.environ.get('RENDER_EXTERNAL_HOSTNAME', ''),
-]
+ALLOWED_HOSTS = ['*']  # Permitir todos los hosts temporalmente
 
 # Aplicaciones instaladas
 INSTALLED_APPS = [
@@ -94,3 +89,32 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Campo de clave primaria por defecto
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Logging para capturar errores
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
