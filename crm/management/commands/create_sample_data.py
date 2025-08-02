@@ -3,31 +3,61 @@ from django.contrib.auth.models import User
 from crm.models import Company, Client, Interaction
 from datetime import date, timedelta
 import random
+import os
 
 class Command(BaseCommand):
-    help = 'Crea datos de ejemplo para el CRM'
+    help = 'Crea superusuario y datos de ejemplo para el CRM'
     
     def handle(self, *args, **options):
-        # Crear usuarios comerciales
+        # CREAR SUPERUSUARIO PRIMERO
+        admin_username = os.environ.get('ADMIN_USERNAME', 'admin')
+        admin_email = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
+        admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
+        
+        if not User.objects.filter(username=admin_username).exists():
+            User.objects.create_superuser(
+                username=admin_username,
+                email=admin_email,
+                password=admin_password
+            )
+            self.stdout.write(
+                self.style.SUCCESS(f'✓ Superusuario "{admin_username}" creado exitosamente')
+            )
+        else:
+            self.stdout.write(
+                self.style.WARNING(f'⚠ Superusuario "{admin_username}" ya existe')
+            )
+        
+        # CREAR USUARIOS COMERCIALES
         user1, created = User.objects.get_or_create(
             username='ana_comercial',
             defaults={
                 'first_name': 'Ana',
                 'last_name': 'Comercial',
-                'email': 'ana@empresa.com'
+                'email': 'ana@empresa.com',
+                'is_staff': True  # Para que puedan acceder al admin
             }
         )
+        if created:
+            user1.set_password('comercial123')  # Establecer contraseña
+            user1.save()
+            self.stdout.write(self.style.SUCCESS('✓ Usuario Ana Comercial creado'))
         
         user2, created = User.objects.get_or_create(
             username='pedro_vendedor',
             defaults={
                 'first_name': 'Pedro',
                 'last_name': 'Vendedor',
-                'email': 'pedro@empresa.com'
+                'email': 'pedro@empresa.com',
+                'is_staff': True  # Para que puedan acceder al admin
             }
         )
+        if created:
+            user2.set_password('vendedor123')  # Establecer contraseña
+            user2.save()
+            self.stdout.write(self.style.SUCCESS('✓ Usuario Pedro Vendedor creado'))
         
-        # Crear empresas
+        # CREAR EMPRESAS
         companies_data = [
             {'name': 'Tech Solutions SL', 'sector': 'Tecnología'},
             {'name': 'Innovate Corp', 'sector': 'Consultoría'},
@@ -40,8 +70,10 @@ class Command(BaseCommand):
         for comp_data in companies_data:
             company, created = Company.objects.get_or_create(**comp_data)
             companies.append(company)
+            if created:
+                self.stdout.write(f'✓ Empresa {company.name} creada')
         
-        # Crear clientes
+        # CREAR CLIENTES
         clients_data = [
             {
                 'name': 'Juan Pérez',
@@ -74,8 +106,10 @@ class Command(BaseCommand):
                 defaults=client_data
             )
             clients.append(client)
+            if created:
+                self.stdout.write(f'✓ Cliente {client.name} creado')
         
-        # Crear interacciones
+        # CREAR INTERACCIONES
         interaction_types = ['llamada', 'email', 'reunion', 'visita']
         descriptions = [
             'Primera llamada comercial. Cliente interesado.',
@@ -86,13 +120,28 @@ class Command(BaseCommand):
             'Cierre de venta exitoso.',
         ]
         
+        interactions_created = 0
         for client in clients:
             for i in range(random.randint(1, 4)):
-                Interaction.objects.get_or_create(
+                interaction, created = Interaction.objects.get_or_create(
                     client=client,
                     user=random.choice([user1, user2]),
                     type=random.choice(interaction_types),
                     description=random.choice(descriptions),
                     date=date.today() - timedelta(days=random.randint(1, 30)),
-                    duration=random.randint(15, 120)
+                    defaults={'duration': random.randint(15, 120)}
                 )
+                if created:
+                    interactions_created += 1
+        
+        self.stdout.write(f'✓ {interactions_created} interacciones creadas')
+        
+        self.stdout.write(
+            self.style.SUCCESS('\n🎉 ¡Setup completado exitosamente!')
+        )
+        self.stdout.write(
+            self.style.SUCCESS(f'👤 Admin: {admin_username} / {admin_password}')
+        )
+        self.stdout.write(
+            self.style.SUCCESS('👥 Usuarios comerciales: ana_comercial y pedro_vendedor (contraseña: comercial123 y vendedor123)')
+        )
