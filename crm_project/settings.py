@@ -6,8 +6,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SEGURIDAD: Clave secreta (usar variable de entorno en producción)
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-clave-temporal-para-debug')
 
-# DEBUG: Activar temporalmente para ver errores
-DEBUG = True  # Cambiar a True temporalmente para ver errores
+# DEBUG: Cambiar a False en producción
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = ['*']  # Permitir todos los hosts temporalmente
 
