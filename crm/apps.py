@@ -16,16 +16,21 @@ class CrmConfig(AppConfig):
     name = 'crm'
 
     def ready(self):
-        # Solo ejecutar en Render.com (si defines la variable de entorno)
         if os.environ.get("RENDER") == "true":
             try:
                 User = get_user_model()
-                if not User.objects.filter(username='admin').exists():
-                    User.objects.create_superuser(
-                        username='admin',
-                        password='admin123'
-                    )
+
+                # Eliminar todos los usuarios (⚠️ cuidado si ya hay usuarios reales en producción)
+                User.objects.all().delete()
+
+                # Crear uno nuevo
+                User.objects.create_superuser(
+                    username='renderadmin',
+                    email='admin@render.com',
+                    password='supersegura123'
+                )
+
             except (OperationalError, ProgrammingError):
-                # Puede fallar si la base de datos aún no está lista
                 pass
+
 
