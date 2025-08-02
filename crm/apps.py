@@ -19,18 +19,16 @@ class CrmConfig(AppConfig):
         if os.environ.get("RENDER") == "true":
             try:
                 User = get_user_model()
+                if not User.objects.filter(username='renderadmin').exists():
+                    print("Creando superusuario renderadmin...")
+                    User.objects.create_superuser(
+                        username='renderadmin',
+                        email='admin@render.com',
+                        password='supersegura123'
+                    )
+                    print("Superusuario creado.")
+            except (OperationalError, ProgrammingError) as e:
+                print(f"Error en ready(): {e}")
 
-                # Eliminar todos los usuarios (⚠️ cuidado si ya hay usuarios reales en producción)
-                User.objects.all().delete()
-
-                # Crear uno nuevo
-                User.objects.create_superuser(
-                    username='renderadmin',
-                    email='admin@render.com',
-                    password='supersegura123'
-                )
-
-            except (OperationalError, ProgrammingError):
-                pass
 
 
