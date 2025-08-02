@@ -175,7 +175,7 @@ class InteractionDeleteView(DeleteView):
         messages.success(request, 'Interacción eliminada exitosamente.')
         return super().delete(request, *args, **kwargs)
 
-@login_required
+#@login_required
 def export_clients_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="clientes.csv"'
@@ -197,7 +197,7 @@ def export_clients_csv(request):
     
     return response
 
-@login_required
+#@login_required
 def export_interactions_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="interacciones.csv"'
