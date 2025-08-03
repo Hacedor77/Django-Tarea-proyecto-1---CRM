@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -7,9 +8,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-clave-temporal-para-debug')
 
 # DEBUG: Cambiar a False en producción
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+DEBUG = 'RENDER' not in os.environ
 
-ALLOWED_HOSTS = ['*']  # Permitir todos los hosts temporalmente
+ALLOWED_HOSTS = []  # Lista de hosts permitidos
+
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 # Aplicaciones instaladas
 INSTALLED_APPS = [
@@ -55,10 +60,12 @@ WSGI_APPLICATION = 'crm_project.wsgi.application'
 
 # Base de datos SQLite por defecto
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default='postgres://postgres:postgres@localhost:5432/postgres',
+        conn_max_age=600,),
+        #'ENGINE': 'django.db.backends.sqlite3',
+        #'NAME': BASE_DIR / 'db.sqlite3',
+    
 }
 
 # Validación de contraseñas
@@ -85,7 +92,12 @@ USE_TZ = True
 
 # Archivos estáticos
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+if not DEBUG:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    # Configuración para producción con WhiteNoise
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 # Campo de clave primaria por defecto
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
